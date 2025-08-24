@@ -1,11 +1,12 @@
 // backend/server.js
-import 'dotenv/config';               // keep this FIRST
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
+import authRouter from './src/routes/auth.js'; // ← add
 
 const PORT = process.env.PORT || 5000;
-const MONGO_URI = process.env.MONGODB_URI;        // use MONGODB_URI (matches your .env)
+const MONGO_URI = process.env.MONGODB_URI;
 const ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:5173';
 
 if (!MONGO_URI) {
@@ -17,10 +18,13 @@ const app = express();
 app.use(cors({ origin: ORIGIN }));
 app.use(express.json());
 
-// simple health check
+// health (keep this, or replace with a healthRouter if you made one)
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
-// demo route (keep if you want)
+// mount auth routes
+app.use('/api/auth', authRouter);
+
+// demo
 app.get('/', (_req, res) => {
   res.send('Hello Technigo!');
 });
