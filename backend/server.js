@@ -3,7 +3,8 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
-import authRouter from './src/routes/auth.js'; // ← add
+import authRouter from './src/routes/auth.js';
+import secretRouter from './src/routes/secret.js';
 
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGODB_URI;
@@ -17,6 +18,7 @@ if (!MONGO_URI) {
 const app = express();
 app.use(cors({ origin: ORIGIN }));
 app.use(express.json());
+app.use('/api/secret', secretRouter);
 
 // health (keep this, or replace with a healthRouter if you made one)
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
