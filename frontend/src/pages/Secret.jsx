@@ -9,34 +9,23 @@ export default function Secret() {
   const [err, setErr] = useState('');
 
   useEffect(() => {
-    if (!token) {
-      setErr('You must be logged in.');
-      return;
-    }
-
-    let cancelled = false;
-
+    if (!token) return setErr('You must be logged in.');
     (async () => {
       try {
-        const res = await fetch(`${api}/api/secret`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await fetch(`${api}/api/secret`, { headers: { Authorization: `Bearer ${token}` } });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
-        if (!cancelled) setMsg(data.message);
+        setMsg(data.message);
       } catch (e) {
-        if (!cancelled) setErr(e.message || 'Failed to load secret');
+        setErr(e.message || 'Failed to load secret');
       }
     })();
-
-    return () => { cancelled = true; };
   }, [api, token]);
 
   return (
     <main style={{ padding: 16 }}>
       <h1>Secret API</h1>
       <p>User: <strong>{user?.name}</strong></p>
-
       {msg && <p>{msg}</p>}
       {err && <p style={{ color: 'red' }}>{err}</p>}
     </main>
