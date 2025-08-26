@@ -1,26 +1,23 @@
-// frontend/src/pages/Secret.jsx
 import { useEffect, useState } from 'react';
+import api from '../lib/api';
 import { useAuth } from '../context/AuthContext';
 
 export default function Secret() {
-  const { token, user } = useAuth();
-  const api = import.meta.env.VITE_API_URL;
+  const { user } = useAuth();
   const [msg, setMsg] = useState('');
   const [err, setErr] = useState('');
 
   useEffect(() => {
-    if (!token) return setErr('You must be logged in.');
     (async () => {
       try {
-        const res = await fetch(`${api}/api/secret`, { headers: { Authorization: `Bearer ${token}` } });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+        const { data } = await api.get('/api/secret'); // token auto-attached
         setMsg(data.message);
       } catch (e) {
-        setErr(e.message || 'Failed to load secret');
+        const msg = e.response?.data?.error || e.message || 'Failed to load';
+        setErr(msg);
       }
     })();
-  }, [api, token]);
+  }, []);
 
   return (
     <main style={{ padding: 16 }}>
