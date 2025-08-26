@@ -4,16 +4,14 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '../context/AuthContext';
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { Page, Card, H1, Hint, Field, Label, Input, ErrorText, Button } from '../ui/components';
 
 const schema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Enter a valid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
   confirmPassword: z.string().min(6, 'Confirm your password'),
-}).refine(v => v.password === v.confirmPassword, {
-  message: 'Passwords must match',
-  path: ['confirmPassword'],
-});
+}).refine(v => v.password === v.confirmPassword, { message: 'Passwords must match', path: ['confirmPassword'] });
 
 export default function Register() {
   const { register: doRegister } = useAuth();
@@ -21,58 +19,57 @@ export default function Register() {
   const navigate = useNavigate();
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
-    resolver: zodResolver(schema),
-    mode: 'onTouched',
+    resolver: zodResolver(schema), mode: 'onTouched',
   });
 
   const onSubmit = async ({ name, email, password }) => {
     setServerError('');
-    try {
-      await doRegister(name, email, password);
-      navigate('/login');
-    } catch (e) {
-      setServerError(e.message || 'Register failed');
-    }
+    try { await doRegister(name, email, password); navigate('/login'); }
+    catch (e) { setServerError(e.message || 'Register failed'); }
   };
 
   return (
-    <main style={{ padding: 16, maxWidth: 420 }}>
-      <h1>Register</h1>
-      {serverError && <p role="alert" style={{ color: 'red' }}>{serverError}</p>}
+    <Page>
+      <Card>
+        <H1>Create account</H1>
+        <Hint>Use a valid email and a password with at least 6 characters.</Hint>
+        {serverError && <ErrorText role="alert">{serverError}</ErrorText>}
 
-      <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        <label>
-          Name
-          <input {...register('name')} aria-invalid={!!errors.name || undefined} aria-describedby={errors.name ? 'name-err' : undefined} />
-        </label>
-        {errors.name && <p id="name-err" role="alert" style={{ color: 'red' }}>{errors.name.message}</p>}
+        <form onSubmit={handleSubmit(onSubmit)} noValidate>
+          <Field>
+            <Label htmlFor="name">Name</Label>
+            <Input id="name" {...register('name')} aria-invalid={!!errors.name || undefined} />
+            {errors.name && <ErrorText id="name-err">{errors.name.message}</ErrorText>}
+          </Field>
 
-        <label>
-          Email
-          <input type="email" {...register('email')} aria-invalid={!!errors.email || undefined} aria-describedby={errors.email ? 'email-err' : undefined} />
-        </label>
-        {errors.email && <p id="email-err" role="alert" style={{ color: 'red' }}>{errors.email.message}</p>}
+          <Field>
+            <Label htmlFor="email">Email</Label>
+            <Input id="email" type="email" {...register('email')} aria-invalid={!!errors.email || undefined} />
+            {errors.email && <ErrorText id="email-err">{errors.email.message}</ErrorText>}
+          </Field>
 
-        <label>
-          Password
-          <input type="password" {...register('password')} aria-invalid={!!errors.password || undefined} aria-describedby={errors.password ? 'password-err' : undefined} />
-        </label>
-        {errors.password && <p id="password-err" role="alert" style={{ color: 'red' }}>{errors.password.message}</p>}
+          <Field>
+            <Label htmlFor="password">Password</Label>
+            <Input id="password" type="password" {...register('password')} aria-invalid={!!errors.password || undefined} />
+            {errors.password && <ErrorText id="password-err">{errors.password.message}</ErrorText>}
+          </Field>
 
-        <label>
-          Confirm password
-          <input type="password" {...register('confirmPassword')} aria-invalid={!!errors.confirmPassword || undefined} aria-describedby={errors.confirmPassword ? 'confirm-err' : undefined} />
-        </label>
-        {errors.confirmPassword && <p id="confirm-err" role="alert" style={{ color: 'red' }}>{errors.confirmPassword.message}</p>}
+          <Field>
+            <Label htmlFor="confirmPassword">Confirm password</Label>
+            <Input id="confirmPassword" type="password" {...register('confirmPassword')} aria-invalid={!!errors.confirmPassword || undefined} />
+            {errors.confirmPassword && <ErrorText id="confirm-err">{errors.confirmPassword.message}</ErrorText>}
+          </Field>
 
-        <button disabled={isSubmitting} style={{ marginTop: 12 }}>
-          {isSubmitting ? 'Creating…' : 'Create account'}
-        </button>
-      </form>
+          <Button disabled={isSubmitting} style={{ marginTop: 8 }}>
+            {isSubmitting ? 'Creating…' : 'Create account'}
+          </Button>
+        </form>
 
-      <p style={{ marginTop: 12 }}>
-        Already have an account? <Link to="/login">Login</Link>
-      </p>
-    </main>
+        <Hint style={{ marginTop: 12 }}>
+          Already have an account? <Link to="/login">Login</Link>
+        </Hint>
+      </Card>
+    </Page>
   );
 }
+
