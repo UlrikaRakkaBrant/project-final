@@ -9,6 +9,7 @@ import mongoose from 'mongoose';
 import authRouter from './src/routes/auth.js';
 import secretRouter from './src/routes/secret.js';
 import readingsRouter from './src/routes/readings.js';
+import tarotRouter from './src/routes/tarot.js';
 
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGODB_URI;
@@ -44,6 +45,7 @@ app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 app.use('/api/auth', authRouter);
 app.use('/api/secret', secretRouter);
 app.use('/api/readings', readingsRouter);
+app.use('/api/tarot', tarotRouter);
 
 // Demo root
 app.get('/', (_req, res) => {
