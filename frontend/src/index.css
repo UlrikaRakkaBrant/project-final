@@ -1,0 +1,51 @@
+/* Simple responsive grid helpers */
+.grid-1-2-3 {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 900px) {
+  .grid-1-2-3 {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+.card {
+  background: var(--card-bg, #fff);
+  border: 1px solid rgba(0, 0, 0, .08);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .05);
+}
+
+.tarot-img {
+  width: 100%;
+  height: auto;
+  max-width: 240px;
+  border-radius: 10px;
+  display: block;
+  margin-inline: auto;
+}
+
+/* Hover overlay for the 3-card headings */
+.overlay-wrap {
+  position: relative;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, .72);
+  color: #fff;
+  padding: 10px 12px;
+  border-radius: 10px;
+  opacity: 0;
+  transition: opacity .2s ease;
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.overlay-wrap:hover .overlay {
+  opacity: 1;
+}
