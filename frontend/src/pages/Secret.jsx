@@ -1,30 +1,17 @@
-import { useEffect, useState } from 'react';
-import api from '../lib/api';
-import { useAuth } from '../context/AuthContext';
+// frontend/src/pages/Secret.jsx
+import { useState } from 'react';
+import { Page, Grid } from '../ui/components';
+import ReadingForm from '../components/ReadingForm';
+import ReadingsList from '../components/ReadingsList';
 
 export default function Secret() {
-  const { user } = useAuth();
-  const [msg, setMsg] = useState('');
-  const [err, setErr] = useState('');
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const { data } = await api.get('/api/secret'); // token auto-attached
-        setMsg(data.message);
-      } catch (e) {
-        const msg = e.response?.data?.error || e.message || 'Failed to load';
-        setErr(msg);
-      }
-    })();
-  }, []);
-
+  const [refreshKey, setRefreshKey] = useState(0);
   return (
-    <main style={{ padding: 16 }}>
-      <h1>Secret API</h1>
-      <p>User: <strong>{user?.name}</strong></p>
-      {msg && <p>{msg}</p>}
-      {err && <p style={{ color: 'red' }}>{err}</p>}
-    </main>
+    <Page>
+      <Grid>
+        <ReadingForm onCreated={() => setRefreshKey(k => k + 1)} />
+        <ReadingsList refreshKey={refreshKey} />
+      </Grid>
+    </Page>
   );
 }

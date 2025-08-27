@@ -1,14 +1,17 @@
 // backend/server.js
-import 'dotenv/config';
+// force .env to override any OS env var
+import dotenv from 'dotenv';
+dotenv.config({ override: true });
 import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
+
 import authRouter from './src/routes/auth.js';
 import secretRouter from './src/routes/secret.js';
+import readingsRouter from './src/routes/readings.js';
 
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGODB_URI;
-const ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:5173';
 
 if (!MONGO_URI) {
   console.error('❌ MONGODB_URI missing in backend/.env');
@@ -16,17 +19,33 @@ if (!MONGO_URI) {
 }
 
 const app = express();
-app.use(cors({ origin: ORIGIN }));
-app.use(express.json());
-app.use('/api/secret', secretRouter);
 
-// health (keep this, or replace with a healthRouter if you made one)
+// --- CORS: allow multiple origins in dev, or use CLIENT_ORIGIN env (comma-separated) ---
+const DEV_ORIGINS = [
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'http://localhost:5175',
+  'http://localhost:5176',
+];
+
+const ORIGINS = process.env.CLIENT_ORIGIN
+  ? process.env.CLIENT_ORIGIN.split(',').map(s => s.trim()).filter(Boolean)
+  : DEV_ORIGINS;
+
+app.use(cors({ origin: ORIGINS }));
+// ---------------------------------------------------------------------------
+
+app.use(express.json());
+
+// Health check
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
-// mount auth routes
+// Routes
 app.use('/api/auth', authRouter);
+app.use('/api/secret', secretRouter);
+app.use('/api/readings', readingsRouter);
 
-// demo
+// Demo root
 app.get('/', (_req, res) => {
   res.send('Hello Technigo!');
 });
@@ -38,6 +57,7 @@ async function start() {
 
     app.listen(PORT, () => {
       console.log(`✓ Server running on http://localhost:${PORT}`);
+      console.log('✓ CORS allowed origins:', ORIGINS.join(', '));
     });
   } catch (err) {
     console.error('DB connection failed:', err.message);
@@ -46,3 +66,4 @@ async function start() {
 }
 
 start();
+

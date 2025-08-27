@@ -13,3 +13,10 @@ yarn-debug.log*
 yarn-error.log*
 
 package-lock.json
+# env files
+backend/.env
+frontend/.env
+
+# env files
+backend/.env
+frontend/.env
