@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Page, Card, H1, Hint, Field, Label, Input, ErrorText, Button } from '../ui/components';
+import WhatsNext from '../components/WhatsNext';
 
 const schema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -64,6 +65,19 @@ export default function Register() {
             {isSubmitting ? 'Creating…' : 'Create account'}
           </Button>
         </form>
+
+        <Page>
+          <Card>
+            <H1>Create account</H1>
+
+            <form onSubmit={handleSubmit(onSubmit)} noValidate>
+              {/* your register fields + submit button stay as-is */}
+            </form>
+
+            <hr style={{ margin: '16px 0', border: 0, borderTop: '1px solid #e5e7eb' }} />
+            <WhatsNext />
+          </Card>
+        </Page>
 
         <Hint style={{ marginTop: 12 }}>
           Already have an account? <Link to="/login">Login</Link>

@@ -29,6 +29,7 @@ Optimised for mobile users, with special attention to mobile-first design
 
 Thanks to:
 https://github.com/krates98/tarotcardapi for images and more.
+https://commons.wikimedia.org/wiki/File:Sebastian_Pether_(1790-1844)_-_Moonlit_Landscape_with_a_Gothic_Ruin_-_1449048_-_National_Trust.jpg for hero image
 
 ## The problem
 

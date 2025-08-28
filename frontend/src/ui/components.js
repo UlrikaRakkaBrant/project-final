@@ -42,29 +42,68 @@ export const Button = styled.button`
   &:disabled{ opacity:.6; cursor:not-allowed; }
 `;
 
-export const GhostButton = styled(Button)`
-  background: transparent; color: ${({ theme }) => theme.colors.text};
-  border:1px solid ${({ theme }) => theme.colors.border};
-  &:hover{ background: ${({ theme }) => theme.colors.page}; }
+/* Theme toggle button styled for the dark nav */
+export const GhostButton = styled.button`
+  background: transparent;
+  color: #f2f4f5;
+  border: 1px solid rgba(255,255,255,.25);
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  &:hover,
+  &:focus-visible {
+    border-color: rgba(255,255,255,.45);
+    transform: translateY(-1px);
+    outline: none;
+  }
+
+  &:active { transform: translateY(0); }
 `;
 
+// NAVBAR
 export const Nav = styled.nav`
-  background:${({ theme }) => theme.colors.bg};
-  border-bottom:1px solid ${({ theme }) => theme.colors.border};
-  padding: 10px 16px; margin-bottom: 16px;
-  position: sticky; top: 0; z-index: 1;
+  position: sticky;     /* stays at top when scrolling */
+  top: 0;
+  z-index: 50;
 
-  display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap;
-  gap: 8px;
+  background: var(--nav-bg); /* uses palette from :root in index.css */
+  color: #f2f4f5;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  padding: 12px 16px;
+  margin: 0;            /* IMPORTANT: removes the gap above the hero */
 `;
 
 export const NavGroup = styled.div`
-  display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
 `;
 
 export const NavLink = styled(RouterLink)`
-  padding: 6px 10px; border-radius:${({ theme }) => theme.radii.sm};
-  &:hover{ background:${({ theme }) => theme.colors.page}; }
+  color: #f7e7a7;       /* moon-gold links to match the hero */
+  text-decoration: none;
+  font-weight: 600;
+  line-height: 1;
+  padding: 4px 2px;
+  border-radius: 6px;
+
+  &:hover,
+  &:focus-visible {
+    text-decoration: underline;
+    outline: none;
+  }
 `;
 
 export const Grid = styled.div`

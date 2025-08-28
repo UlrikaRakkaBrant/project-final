@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Page, Card, H1, Hint, Field, Label, Input, ErrorText, Button } from '../ui/components';
+import WhatsNext from '../components/WhatsNext';   // <-- added
 
 const schema = z.object({
   email: z.string().email('Enter a valid email address'),
@@ -17,7 +18,8 @@ export default function Login() {
   const navigate = useNavigate();
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
-    resolver: zodResolver(schema), mode: 'onTouched',
+    resolver: zodResolver(schema),
+    mode: 'onTouched',
   });
 
   const onSubmit = async (v) => {
@@ -36,13 +38,15 @@ export default function Login() {
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
           <Field>
             <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" {...register('email')} aria-invalid={!!errors.email || undefined} />
+            <Input id="email" type="email" {...register('email')}
+              aria-invalid={!!errors.email || undefined} />
             {errors.email && <ErrorText id="login-email-err">{errors.email.message}</ErrorText>}
           </Field>
 
           <Field>
             <Label htmlFor="password">Password</Label>
-            <Input id="password" type="password" {...register('password')} aria-invalid={!!errors.password || undefined} />
+            <Input id="password" type="password" {...register('password')}
+              aria-invalid={!!errors.password || undefined} />
             {errors.password && <ErrorText id="login-pass-err">{errors.password.message}</ErrorText>}
           </Field>
 
@@ -51,6 +55,11 @@ export default function Login() {
           </Button>
         </form>
 
+        {/* ---- added below the form ---- */}
+        <hr style={{ margin: '16px 0', border: 0, borderTop: '1px solid #e5e7eb' }} />
+        <WhatsNext />
+        {/* ---- end added block ---- */}
+
         <Hint style={{ marginTop: 12 }}>
           New here? <Link to="/register">Create an account</Link>
         </Hint>
@@ -58,3 +67,4 @@ export default function Login() {
     </Page>
   );
 }
+

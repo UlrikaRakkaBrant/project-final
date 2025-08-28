@@ -1,4 +1,38 @@
-/* Simple responsive grid helpers */
+/* ========= Design tokens ========= */
+:root {
+  --font-display: "Playfair Display", serif;
+  --font-body: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+
+  /* keep these roughly in sync with theme.js (light mode) */
+  --bg: #ebab095;
+  --text: #1f2426;
+  /* navbar text & hero text */
+  --muted: #6c7a7d;
+  --card-bg: #ffffff;
+  --accent: #d1a84a;
+  /* moonlight gold for CTA */
+  --nav-bg: #222a2d;
+  /* dark bar later */
+
+  /* keep the overlay gone */
+  --hero-dark-top: 0;
+  --hero-dark-bottom: 0;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+}
+
+/* ========= Layout helpers ========= */
 .grid-1-2-3 {
   display: grid;
   gap: 16px;
@@ -12,13 +46,14 @@
 }
 
 .card {
-  background: var(--card-bg, #fff);
+  background: var(--card-bg);
   border: 1px solid rgba(0, 0, 0, .08);
   border-radius: 12px;
   padding: 16px;
   box-shadow: 0 4px 14px rgba(0, 0, 0, .05);
 }
 
+/* ========= Tarot image + overlay ========= */
 .tarot-img {
   width: 100%;
   height: auto;
@@ -50,82 +85,76 @@
   opacity: 1;
 }
 
-:root {
-  --font-display: "Playfair Display", serif;
-  --font-body: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-
-  --bg: #f6f7fb;
-  --text: #1f2328;
-  --muted: #6b7280;
-  --card-bg: #ffffff;
-  --accent: #ff6b6b;
-  /* coral-ish button */
-  --nav-bg: #333;
-  /* dark top bar if you add one later */
-}
-
-html,
-body,
-#root {
-  height: 100%;
-}
-
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font-body);
-}
-
-/* HERO */
+/* ========= Hero ========= */
 .hero {
   position: relative;
-  min-height: clamp(320px, 45vw, 560px);
-  border-radius: 14px;
+  min-height: clamp(360px, 42vw, 520px);
+  border-radius: 0;
   overflow: hidden;
-  background: url('/hero.jpg') center/cover no-repeat;
+
+  /* use separate props so nothing overrides position later */
+  background-image: url('/hero.jpg');
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: var(--hero-pos);
+  /* <- reads the prop */
+
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 16px;
+  margin: 0;
 }
 
 .hero::before {
-  content: "";
+  /* use "" instead of none to get the darker overlay */
+  content: none;
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(0, 0, 0, .45), rgba(0, 0, 0, .35));
+  /* lighten/darken by tweaking the two vars above */
+  background: linear-gradient(180deg,
+      rgba(0, 0, 0, var(--hero-dark-top)),
+      rgba(0, 0, 0, var(--hero-dark-bottom)));
 }
 
 .hero .content {
   position: relative;
-  color: #fff;
+  color: var(--text);
+  /* match navbar/app text */
   text-align: center;
   max-width: 920px;
   padding: 18px 22px;
   border-radius: 12px;
-  background: rgba(0, 0, 0, .35);
-  backdrop-filter: blur(2px);
+  background: transparent;
+  /* no dark panel */
+  backdrop-filter: none;
 }
 
+/* use the app/body font instead of the display font */
 .hero-title {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-weight: 800;
+  /* strong like your H1 */
   font-size: clamp(28px, 6vw, 56px);
   margin: 0 0 10px;
+  color: var(--accent);
+  /* same as navbar */
 }
 
 .hero-sub {
+  font-family: var(--font-body);
+  color: var(--accent);
   font-size: clamp(14px, 2.2vw, 22px);
-  opacity: .95;
   margin: 0 0 16px;
 }
 
+/* CTA uses the new gold accent */
 .btn-accent {
   display: inline-block;
   padding: 10px 18px;
   border-radius: 10px;
   background: var(--accent);
-  color: #fff;
+  color: #1b1f23;
+  /* dark text on gold for contrast */
   font-weight: 600;
   border: none;
   cursor: pointer;
@@ -137,23 +166,42 @@ body {
   cursor: default;
 }
 
-/* (your earlier helpers) */
-.grid-1-2-3 {
-  display: grid;
-  gap: 16px;
-  grid-template-columns: 1fr;
+/* --- hero readability tweaks (optional) --- */
+.hero {
+  /* a touch taller on phones, a bit shorter on huge screens */
+  min-height: clamp(360px, 42vw, 520px);
 }
 
-@media (min-width: 900px) {
-  .grid-1-2-3 {
-    grid-template-columns: 1fr 1fr 1fr;
+/* stronger text legibility without over-darkening the photo */
+.hero .content {
+  background: linear-gradient(to bottom,
+      rgba(0, 0, 0, .35),
+      rgba(0, 0, 0, .4));
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .35);
+}
+
+/* CTA hover focus states */
+.btn-accent:hover,
+.btn-accent:focus-visible {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+  transition: transform .15s ease, filter .15s ease;
+  outline: none;
+}
+
+/* give a little extra space below hero so the next section breathes */
+.hero+.page-root,
+.hero+main {
+  margin-top: 16px;
+}
+
+/* Desktop: make the hero taller so more of the painting shows */
+@media (min-width: 1024px) {
+  .hero {
+    /* pick one of these heights — start with the first line */
+    min-height: clamp(600px, 58vw, 820px);
+    /* GOOD default */
+    /* OR: height: 62vh; min-height: 600px;  */
+    /* alternative */
   }
-}
-
-.card {
-  background: var(--card-bg);
-  border: 1px solid rgba(0, 0, 0, .08);
-  border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, .05);
 }

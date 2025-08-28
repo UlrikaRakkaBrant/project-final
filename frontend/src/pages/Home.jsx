@@ -1,3 +1,4 @@
+// frontend/src/pages/Home.jsx
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Page, Card, H1, H2, Hint, Button, Grid } from '../ui/components';
@@ -5,70 +6,70 @@ import { Link } from 'react-router-dom';
 
 import TarotCard from '../components/TarotCard';
 import { drawOneCard } from '../services/tarot';
-import Hero from '../components/Hero';   // ← NEW
+import Hero from '../components/Hero';
 
 export default function Home() {
   const { user, isLoggedIn, logout } = useAuth();
 
-  // one-card draw state you already added
   const [card, setCard] = useState(null);
   const [loading, setLoading] = useState(false);
+
   async function onDraw() {
     setLoading(true);
-    try { setCard(await drawOneCard()); }
-    finally { setLoading(false); }
+    try {
+      setCard(await drawOneCard()); // random, 50% reversed
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
-    <Page>
-      <Hero />
-      <Grid>
-        {/* One-card guidance (kept) */}
-        <Card>
-          <H1>One-card Guidance</H1>
-          <Hint><b>Think of something you want guidance about.</b></Hint>
-          <TarotCard card={card} />
-          <div style={{ marginTop: 12 }}>
-            <Button onClick={onDraw} disabled={loading}>
-              {loading ? 'Drawing…' : (card ? 'Draw again' : 'Draw card')}
-            </Button>
-          </div>
-        </Card>
+    <>
+      {/* Full-bleed hero is now OUTSIDE the <Page> wrapper */}
+      <Hero position="right 75%" />
 
-        {/* Your existing cards (kept) */}
-        <Card>
-          <H1>{isLoggedIn ? `Welcome, ${user?.name}!` : 'Welcome to the Tarot App'}</H1>
-          <Hint>
-            {isLoggedIn
-              ? 'You are logged in. Head to your secret dashboard or start exploring features.'
-              : 'Create an account or log in to save readings, daily cards, and notes.'}
-          </Hint>
-          {isLoggedIn ? (
-            <>
-              <Button as={Link} to="/secret" style={{ marginRight: 8 }}>Open Dashboard</Button>
-              <Button onClick={logout}>Log out</Button>
-            </>
-          ) : (
-            <>
-              <Button as={Link} to="/register" style={{ marginRight: 8 }}>Create account</Button>
-              <Button as={Link} to="/login">Login</Button>
-            </>
-          )}
-        </Card>
+      <Page>
+        <Grid>
+          {/* One-card guidance */}
+          <Card>
+            <H1>One-card Guidance</H1>
+            <Hint><b>Think of something you want guidance about.</b></Hint>
+            <TarotCard card={card} />
+            <div style={{ marginTop: 12 }}>
+              <Button onClick={onDraw} disabled={loading}>
+                {loading ? 'Drawing…' : (card ? 'Draw again' : 'Draw card')}
+              </Button>
+            </div>
+          </Card>
 
-        <Card>
-          <H2>What’s next?</H2>
-          <ul style={{ margin: '8px 0 0 18px' }}>
-            <li>Daily Card (per-user) with history</li>
-            <li>Readings (1–3 card spreads) with notes</li>
-            <li>Saved spreads and journal</li>
-          </ul>
-          <Hint style={{ marginTop: 8 }}>
-            The “Secret” link is your temporary dashboard—JWT-protected and ready to expand.
-          </Hint>
-        </Card>
-      </Grid>
-    </Page>
+          {/* Welcome card (kept) */}
+          <Card>
+            <H1>{isLoggedIn ? `Welcome, ${user?.name}!` : 'Welcome to the Tarot App'}</H1>
+            <Hint>
+              {isLoggedIn
+                ? 'You are logged in. Head to your secret dashboard or start exploring features.'
+                : 'Create an account or log in to save readings, daily cards, and notes.'}
+            </Hint>
+
+            {isLoggedIn ? (
+              <>
+                <Button as={Link} to="/secret" style={{ marginRight: 8 }}>
+                  Open Dashboard
+                </Button>
+                <Button onClick={logout}>Log out</Button>
+              </>
+            ) : (
+              <>
+                <Button as={Link} to="/register" style={{ marginRight: 8 }}>
+                  Create account
+                </Button>
+                <Button as={Link} to="/login">Login</Button>
+              </>
+            )}
+          </Card>
+        </Grid>
+      </Page>
+    </>
   );
 }
 

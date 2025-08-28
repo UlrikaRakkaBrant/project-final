@@ -1,38 +1,49 @@
 // frontend/src/ui/theme.js
-export const light = {
-  colors: {
-    bg: '#ffffff',
-    page: '#f8fafc',
-    text: '#111827',
-    muted: '#6b7280',
-    border: '#e5e7eb',
-    primary: '#7c3aed',
-    primaryHover: '#6d28d9',
-    primaryText: '#ffffff',
-    danger: '#dc2626',
-    focus: '#2563eb',
-  },
-  radii: { sm: '8px', md: '12px', lg: '16px' },
-  shadow: { sm: '0 1px 2px rgba(0,0,0,.06)', md: '0 6px 20px rgba(0,0,0,.08)' },
-  space: (n) => `${n * 4}px`,
+
+// "Moonlight landscape" palette
+const light = {
+  // page + card
+  page: '#bab095',   // page background
+  bg: '#ffffff',   // card/nav background
+  border: '#e3eaeb',
+
+  // text
+  text: '#1f2426',   // main text (also navbar/hero text)
+  muted: '#6c7a7d',
+
+  // brand
+  primary: '#d1a84a', // moonlight gold
+  primaryHover: '#bf983f',
+  primaryText: '#1b1f23', // dark text on gold
+
+  // states
+  focus: '#2563eb',
+  danger: '#e5484d',
 };
 
-export const dark = {
-  colors: {
-    bg: '#0b1020',
-    page: '#070b16',
-    text: '#e5e7eb',
-    muted: '#9ca3af',
-    border: '#1f2937',
-    primary: '#8b5cf6',
-    primaryHover: '#7c3aed',
-    primaryText: '#ffffff',
-    danger: '#ef4444',
-    focus: '#93c5fd',
-  },
-  radii: { sm: '8px', md: '12px', lg: '16px' },
-  shadow: { sm: '0 1px 2px rgba(0,0,0,.25)', md: '0 6px 20px rgba(0,0,0,.35)' },
-  space: (n) => `${n * 4}px`,
+const dark = {
+  page: '#0f1416',
+  bg: '#161d1f',
+  border: '#2a3437',
+
+  text: '#e7ecec',
+  muted: '#95a3a7',
+
+  primary: '#d1a84a',
+  primaryHover: '#c09941',
+  primaryText: '#0f1416',
+
+  focus: '#4f83ff',
+  danger: '#ff6b6b',
 };
 
-export const getTheme = (mode = 'light') => (mode === 'dark' ? dark : light);
+export function getTheme(mode = 'light') {
+  const colors = mode === 'dark' ? dark : light;
+  return {
+    mode,
+    colors,
+    radii: { sm: '8px', md: '12px', lg: '16px' },
+    shadow: { sm: '0 4px 14px rgba(0,0,0,.06)' },
+  };
+}
+
