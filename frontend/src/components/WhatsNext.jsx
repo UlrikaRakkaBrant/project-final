@@ -6,13 +6,15 @@ export default function WhatsNext() {
     <>
       <H2>What’s next?</H2>
       <ul style={{ margin: '8px 0 0 18px' }}>
-        <li>Daily Card (per-user) with history</li>
-        <li>Readings (1–3 card spreads) with notes</li>
-        <li>Saved spreads and journal</li>
+        <li>One card draw</li>
+        <li>Three card spread - Your Focal Point</li>
+        <li>Comment and save</li>
       </ul>
       <Hint style={{ marginTop: 8 }}>
-        The “Secret” link is your temporary dashboard—JWT-protected and ready to expand.
+        After signing in, you’ll land on your dashboard where you can draw cards,
+        save readings, and revisit your history.
       </Hint>
+
     </>
   );
 }

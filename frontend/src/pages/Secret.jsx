@@ -1,8 +1,8 @@
+// frontend/src/pages/Secret.jsx
 import { useState } from 'react';
 import { Page } from '../ui/components';
 import TarotCard from '../components/TarotCard';
 import { drawOneCard } from '../services/tarot';
-import ReadingForm from '../components/ReadingForm';
 import ReadingsList from '../components/ReadingsList';
 import { createReading } from '../services/readings';
 
@@ -22,8 +22,8 @@ export default function Secret() {
   const [c3, setC3] = useState(null);
   const [busy, setBusy] = useState({ c1: false, c2: false, c3: false });
 
-  const focalText = `Focus on this and the benefits will be bigger than anything else. 
-A 'knot in a muscle'. Aspect of yourself to express? Challenge to overcome? 
+  const focalText = `Focus on this and the benefits will be bigger than anything else.
+A 'knot in a muscle'. Aspect of yourself to express? Challenge to overcome?
 Something neglected that needs attention?`;
   const receiveText = `Let this in to unlock the Focal Point. The world is trying to give
 this to you. A window of opportunity? An invitation?`;
@@ -32,8 +32,11 @@ Task to complete? Get this out to dissolve the block around the Focal Point.`;
 
   async function draw(setter, key) {
     setBusy(s => ({ ...s, [key]: true }));
-    try { setter(await drawOneCard()); }
-    finally { setBusy(s => ({ ...s, [key]: false })); }
+    try {
+      setter(await drawOneCard());
+    } finally {
+      setBusy(s => ({ ...s, [key]: false }));
+    }
   }
 
   async function saveThree() {
@@ -53,11 +56,26 @@ Task to complete? Get this out to dissolve the block around the Focal Point.`;
     alert('Saved!');
   }
 
+  async function saveOne() {
+    if (!oneCard) return; // safety
+    await createReading({
+      spread: 'one',
+      title: 'Single',
+      notes: '',
+      tags: ['auto', 'one'],
+      cards: [
+        { id: oneCard.name, reversed: !!oneCard.reversed, position: 'Single' },
+      ],
+    });
+    setRefreshKey(k => k + 1);
+    alert('Saved!');
+  }
+
   return (
     <Page>
       <div className="grid-1-2-3">
-        {/* Left: draw area */}
-        <div className="card">
+        {/* LEFT: draw area (span two columns on desktop) */}
+        <div className="card span-2">
           <H1>Draw options</H1>
 
           <label style={{ display: 'inline-flex', gap: 8, marginRight: 16 }}>
@@ -72,29 +90,52 @@ Task to complete? Get this out to dissolve the block around the Focal Point.`;
           {mode === 'one' ? (
             <div style={{ marginTop: 16 }}>
               <p><b>Think of something you want guidance about.</b></p>
+
               <TarotCard card={oneCard} />
-              <button onClick={async () => { setBusyOne(true); try { setOneCard(await drawOneCard()); } finally { setBusyOne(false); } }}
-                disabled={busyOne} style={{ marginTop: 12 }}>
-                {busyOne ? 'Drawing…' : (oneCard ? 'Draw again' : 'Draw card')}
-              </button>
+
+              <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+                <button
+                  onClick={async () => {
+                    setBusyOne(true);
+                    try { setOneCard(await drawOneCard()); }
+                    finally { setBusyOne(false); }
+                  }}
+                  disabled={busyOne}
+                >
+                  {busyOne ? 'Drawing…' : (oneCard ? 'Draw again' : 'Draw card')}
+                </button>
+
+                {/* New: quick-save for one-card readings */}
+                <button onClick={saveOne} disabled={!oneCard}>
+                  Save as reading
+                </button>
+              </div>
             </div>
           ) : (
             <div style={{ marginTop: 16 }}>
               <div className="grid-1-2-3">
                 <div>
-                  <TarotCard title="Focal Point" hoverText={focalText} card={c1} />
+                  <div className="hint-toggle">Focal Point</div>
+                  <div className="hint">{focalText}</div>
+                  <TarotCard card={c1} />
                   <button onClick={() => draw(setC1, 'c1')} disabled={busy.c1} style={{ marginTop: 8 }}>
                     {busy.c1 ? 'Drawing…' : (c1 ? 'Draw again' : 'Draw card')}
                   </button>
                 </div>
+
                 <div>
-                  <TarotCard title="Gift to Receive" hoverText={receiveText} card={c2} />
+                  <div className="hint-toggle">Gift to Receive</div>
+                  <div className="hint">{receiveText}</div>
+                  <TarotCard card={c2} />
                   <button onClick={() => draw(setC2, 'c2')} disabled={busy.c2} style={{ marginTop: 8 }}>
                     {busy.c2 ? 'Drawing…' : (c2 ? 'Draw again' : 'Draw card')}
                   </button>
                 </div>
+
                 <div>
-                  <TarotCard title="Gift to Give" hoverText={giveText} card={c3} />
+                  <div className="hint-toggle">Gift to Give</div>
+                  <div className="hint">{giveText}</div>
+                  <TarotCard card={c3} />
                   <button onClick={() => draw(setC3, 'c3')} disabled={busy.c3} style={{ marginTop: 8 }}>
                     {busy.c3 ? 'Drawing…' : (c3 ? 'Draw again' : 'Draw card')}
                   </button>
@@ -102,19 +143,15 @@ Task to complete? Get this out to dissolve the block around the Focal Point.`;
               </div>
 
               <div style={{ marginTop: 12 }}>
-                <button onClick={saveThree} disabled={!c1 || !c2 || !c3}>Save as reading</button>
+                <button onClick={saveThree} disabled={!c1 || !c2 || !c3}>
+                  Save as reading
+                </button>
               </div>
             </div>
           )}
         </div>
 
-        {/* Middle: create reading (manual form you already had) */}
-        <div className="card">
-          <H1>Create a Reading</H1>
-          <ReadingForm onCreated={() => setRefreshKey(k => k + 1)} />
-        </div>
-
-        {/* Right: saved readings */}
+        {/* RIGHT: saved readings */}
         <div className="card">
           <H1>My Readings</H1>
           <ReadingsList refreshKey={refreshKey} />
@@ -123,4 +160,5 @@ Task to complete? Get this out to dissolve the block around the Focal Point.`;
     </Page>
   );
 }
+
 

@@ -110,3 +110,9 @@ export const Grid = styled.div`
   display:grid; gap:16px;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
 `;
+
+export const Divider = styled.hr`
+  border: 0;
+  border-top: 1px solid ${({ theme }) => theme.colors.border};
+  margin: 16px 0;
+`;

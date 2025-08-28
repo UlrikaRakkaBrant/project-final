@@ -205,3 +205,81 @@ body {
     /* alternative */
   }
 }
+
+/* Headline-with-tooltip used above the 3 cards */
+.info-head {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 8px;
+}
+
+.info-title {
+  font-weight: 700;
+  color: var(--text);
+  /* or var(--accent) if you want the gold */
+  cursor: help;
+  text-decoration: underline dotted;
+}
+
+.info-tip {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 6px);
+  z-index: 10;
+  width: min(320px, 80vw);
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, .85);
+  color: #fff;
+  font-size: 14px;
+  line-height: 1.35;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, .25);
+  opacity: 0;
+  transform: translateY(4px);
+  pointer-events: none;
+  transition: opacity .15s ease, transform .15s ease;
+}
+
+/* show on hover OR keyboard focus */
+.info-head:hover .info-tip,
+.info-head:focus-within .info-tip {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* keep tooltip inside on tiny screens */
+@media (max-width: 420px) {
+  .info-tip {
+    left: 50%;
+    transform: translate(-50%, 6px);
+  }
+
+  .info-head:hover .info-tip,
+  .info-head:focus-within .info-tip {
+    transform: translate(-50%, 0);
+  }
+}
+
+/* Make the first card span two columns on wide screens */
+@media (min-width: 900px) {
+  .grid-1-2-3>.span-2 {
+    grid-column: 1 / span 2;
+  }
+}
+
+/* Show the explanatory text only when hovering the heading */
+.hint-toggle {
+  font-weight: 700;
+  cursor: help;
+  margin-bottom: 4px;
+}
+
+.hint {
+  display: none;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.hint-toggle:hover+.hint {
+  display: block;
+}

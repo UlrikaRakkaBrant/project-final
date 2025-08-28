@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '../context/AuthContext';
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Page, Card, H1, Hint, Field, Label, Input, ErrorText, Button } from '../ui/components';
+import { Page, Card, H1, Hint, Field, Label, Input, ErrorText, Button, Divider } from '../ui/components';
 import WhatsNext from '../components/WhatsNext';
 
 const schema = z.object({
@@ -12,7 +12,10 @@ const schema = z.object({
   email: z.string().email('Enter a valid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
   confirmPassword: z.string().min(6, 'Confirm your password'),
-}).refine(v => v.password === v.confirmPassword, { message: 'Passwords must match', path: ['confirmPassword'] });
+}).refine(v => v.password === v.confirmPassword, {
+  message: 'Passwords must match',
+  path: ['confirmPassword'],
+});
 
 export default function Register() {
   const { register: doRegister } = useAuth();
@@ -20,13 +23,18 @@ export default function Register() {
   const navigate = useNavigate();
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
-    resolver: zodResolver(schema), mode: 'onTouched',
+    resolver: zodResolver(schema),
+    mode: 'onTouched',
   });
 
   const onSubmit = async ({ name, email, password }) => {
     setServerError('');
-    try { await doRegister(name, email, password); navigate('/login'); }
-    catch (e) { setServerError(e.message || 'Register failed'); }
+    try {
+      await doRegister(name, email, password);
+      navigate('/login');
+    } catch (e) {
+      setServerError(e.message || 'Register failed');
+    }
   };
 
   return (
@@ -66,18 +74,9 @@ export default function Register() {
           </Button>
         </form>
 
-        <Page>
-          <Card>
-            <H1>Create account</H1>
-
-            <form onSubmit={handleSubmit(onSubmit)} noValidate>
-              {/* your register fields + submit button stay as-is */}
-            </form>
-
-            <hr style={{ margin: '16px 0', border: 0, borderTop: '1px solid #e5e7eb' }} />
-            <WhatsNext />
-          </Card>
-        </Page>
+        {/* Exactly like Login: divider + info block inside the same Card */}
+        <Divider aria-hidden="true" />
+        <WhatsNext />
 
         <Hint style={{ marginTop: 12 }}>
           Already have an account? <Link to="/login">Login</Link>
@@ -86,4 +85,5 @@ export default function Register() {
     </Page>
   );
 }
+
 
