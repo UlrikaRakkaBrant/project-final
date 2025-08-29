@@ -21,7 +21,7 @@ if (!MONGO_URI) {
 
 const app = express();
 
-// --- CORS: allow multiple origins in dev, or use CLIENT_ORIGIN env (comma-separated) ---
+// --- CORS (dev + production) -----------------------------------------------
 const DEV_ORIGINS = [
   'http://localhost:5173',
   'http://localhost:5174',
@@ -29,11 +29,30 @@ const DEV_ORIGINS = [
   'http://localhost:5176',
 ];
 
-const ORIGINS = process.env.CLIENT_ORIGIN
-  ? process.env.CLIENT_ORIGIN.split(',').map(s => s.trim()).filter(Boolean)
-  : DEV_ORIGINS;
+// Allow comma-separated env (ex: "https://pocketoracle.netlify.app,http://localhost:5173")
+const ENV_ORIGINS = (process.env.CLIENT_ORIGIN || '')
+  .split(',')
+  .map(s => s.trim())
+  .filter(Boolean);
 
-app.use(cors({ origin: ORIGINS }));
+const ALLOWED_ORIGINS = ENV_ORIGINS.length ? ENV_ORIGINS : DEV_ORIGINS;
+
+const corsOptions = {
+  origin(origin, cb) {
+    // allow curl/health checks (no Origin) and any listed origin
+    if (!origin || ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
+    cb(new Error(`CORS: origin not allowed -> ${origin}`));
+  },
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: false,
+  maxAge: 86400,
+  optionsSuccessStatus: 204
+};
+
+app.use(cors(corsOptions));
+// Make sure every route responds to preflight
+app.options('*', cors(corsOptions));
 // ---------------------------------------------------------------------------
 
 app.use(express.json());
