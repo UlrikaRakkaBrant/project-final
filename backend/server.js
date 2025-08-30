@@ -78,8 +78,9 @@ async function start() {
 
     app.listen(PORT, () => {
       console.log(`✓ Server running on http://localhost:${PORT}`);
-      console.log('✓ CORS allowed origins:', ORIGINS.join(', '));
+      console.log('✓ CORS allowed origins:', (ALLOWED_ORIGINS || []).join(', '));
     });
+
   } catch (err) {
     console.error('DB connection failed:', err.message);
     process.exit(1);
