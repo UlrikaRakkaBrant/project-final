@@ -1,12 +1,21 @@
 // frontend/src/pages/Home.jsx
 import { useState } from 'react';
+import styled from 'styled-components';
 import { useAuth } from '../context/AuthContext';
-import { Page, Card, H1, H2, Hint, Button, Grid } from '../ui/components';
+import { Page, Card, H1, Hint, Button } from '../ui/components';
 import { Link } from 'react-router-dom';
 
 import TarotCard from '../components/TarotCard';
 import { drawOneCard } from '../services/tarot';
 import Hero from '../components/Hero';
+
+// Regular card look, but centered content
+const CenterCard = styled(Card)`
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
 
 export default function Home() {
   const { user, isLoggedIn, logout } = useAuth();
@@ -23,51 +32,49 @@ export default function Home() {
     }
   }
 
+  const greeting = isLoggedIn && user?.name ? `Hi, ${user.name}!` : 'Hi!';
+
   return (
     <>
-      {/* Full-bleed hero is now OUTSIDE the <Page> wrapper */}
+      {/* Full-bleed hero stays outside Page */}
       <Hero position="right 75%" />
 
       <Page>
-        <Grid>
-          {/* One-card guidance */}
-          <Card>
-            <H1>One-card Guidance</H1>
-            <Hint><b>Think of something you want guidance about.</b></Hint>
-            <TarotCard card={card} />
-            <div style={{ marginTop: 12 }}>
-              <Button onClick={onDraw} disabled={loading}>
-                {loading ? 'Drawing…' : (card ? 'Draw again' : 'Draw card')}
-              </Button>
+        {/* Row 1 — Welcome (visible card) */}
+        <CenterCard>
+          <H1>{greeting}</H1>
+          <Hint>
+            {isLoggedIn
+              ? 'Welcome back. Head to your dashboard to draw cards and save readings.'
+              : 'Draw a card now or log in / create an account to save your readings.'}
+          </Hint>
+
+          {isLoggedIn ? (
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
+              <Button as={Link} to="/secret">Open Dashboard</Button>
+              <Button onClick={logout}>Log out</Button>
             </div>
-          </Card>
+          ) : (
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
+              <Button as={Link} to="/register">Create account</Button>
+              <Button as={Link} to="/login">Login</Button>
+            </div>
+          )}
+        </CenterCard>
 
-          {/* Welcome card (kept) */}
-          <Card>
-            <H1>{isLoggedIn ? `Welcome, ${user?.name}!` : 'Welcome to the Tarot App'}</H1>
-            <Hint>
-              {isLoggedIn
-                ? 'You are logged in. Head to your secret dashboard or start exploring features.'
-                : 'Create an account or log in to save readings, daily cards, and notes.'}
-            </Hint>
+        {/* Row 2 — One-card Guidance (also visible card, centered) */}
+        <CenterCard>
+          <H1>One-card Guidance</H1>
+          <Hint><b>Think of something you want guidance about.</b></Hint>
 
-            {isLoggedIn ? (
-              <>
-                <Button as={Link} to="/secret" style={{ marginRight: 8 }}>
-                  Open Dashboard
-                </Button>
-                <Button onClick={logout}>Log out</Button>
-              </>
-            ) : (
-              <>
-                <Button as={Link} to="/register" style={{ marginRight: 8 }}>
-                  Create account
-                </Button>
-                <Button as={Link} to="/login">Login</Button>
-              </>
-            )}
-          </Card>
-        </Grid>
+          <TarotCard card={card} />
+
+          <div style={{ marginTop: 12 }}>
+            <Button onClick={onDraw} disabled={loading}>
+              {loading ? 'Drawing…' : (card ? 'Draw again' : 'Draw card')}
+            </Button>
+          </div>
+        </CenterCard>
       </Page>
     </>
   );
