@@ -2,14 +2,22 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL, // e.g. http://localhost:5000 or your Render URL
+  baseURL: import.meta.env.VITE_API_URL,
 });
 
-// Always attach the latest token from localStorage
+// Always attach the latest token from localStorage (un-stringify if needed)
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+  const raw = localStorage.getItem('token');
+  let token = raw;
+  try {
+    // If it was stored via JSON.stringify, this removes the quotes.
+    token = raw ? JSON.parse(raw) : null;
+  } catch {
+    // raw wasn't JSON – that's fine, use as-is
+  }
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
 export default api;
+
