@@ -2,22 +2,46 @@
 import axios from 'axios';
 
 const api = axios.create({
+  // e.g. http://localhost:5000 (local) or your Render URL (Netlify)
   baseURL: import.meta.env.VITE_API_URL,
 });
 
-// Always attach the latest token from localStorage (un-stringify if needed)
+/**
+ * REQUEST interceptor
+ * Always attach the latest token from localStorage.
+ * If it was saved via JSON.stringify, remove the quotes first.
+ */
 api.interceptors.request.use((config) => {
   const raw = localStorage.getItem('token');
   let token = raw;
   try {
-    // If it was stored via JSON.stringify, this removes the quotes.
-    token = raw ? JSON.parse(raw) : null;
+    token = raw ? JSON.parse(raw) : null; // <-- important: removes quotes if present
   } catch {
-    // raw wasn't JSON – that's fine, use as-is
+    // raw wasn't JSON; use as-is
   }
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
-export default api;
+/**
+ * RESPONSE interceptor
+ * On 401/403, clear auth and send user to /login.
+ */
+api.interceptors.response.use(
+  (res) => res,
+  (err) => {
+    const s = err?.response?.status;
+    if (s === 401 || s === 403) {
+      try {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+      } catch { }
+      if (window.location.pathname !== '/login') {
+        window.location.replace('/login');
+      }
+    }
+    return Promise.reject(err);
+  }
+);
 
+export default api;
