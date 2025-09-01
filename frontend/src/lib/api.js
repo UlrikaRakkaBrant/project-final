@@ -2,44 +2,39 @@
 import axios from 'axios';
 
 const api = axios.create({
-  // e.g. http://localhost:5000 (local) or your Render URL (Netlify)
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: import.meta.env.VITE_API_URL, // Render URL in prod, http://localhost:5000 in dev
 });
 
-/**
- * REQUEST interceptor
- * Always attach the latest token from localStorage.
- * If it was saved via JSON.stringify, remove the quotes first.
- */
+// Always attach latest token before each request
 api.interceptors.request.use((config) => {
-  const raw = localStorage.getItem('token');
-  let token = raw;
-  try {
-    token = raw ? JSON.parse(raw) : null; // <-- important: removes quotes if present
-  } catch {
-    // raw wasn't JSON; use as-is
-  }
+  const token = localStorage.getItem('token');
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
-/**
- * RESPONSE interceptor
- * On 401/403, clear auth and send user to /login.
- */
+// --- Response interceptor: handle auth failures globally ---
+let redirecting = false; // prevent redirect loops
+
 api.interceptors.response.use(
   (res) => res,
   (err) => {
-    const s = err?.response?.status;
-    if (s === 401 || s === 403) {
-      try {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-      } catch { }
-      if (window.location.pathname !== '/login') {
-        window.location.replace('/login');
-      }
+    const status = err?.response?.status;
+
+    // 401 (unauthenticated) or 403 (forbidden) → log out + send to /login
+    if ((status === 401 || status === 403) && !redirecting) {
+      redirecting = true;
+      // Clear any stale credentials
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+
+      // Optional: be nice to the user
+      // You can replace this with your toast/snackbar
+      alert('Your session expired. Please log in again.');
+
+      // Hard redirect so all state resets
+      window.location.assign('/login');
     }
+
     return Promise.reject(err);
   }
 );
