@@ -5,10 +5,28 @@ const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL, // Render URL in prod, http://localhost:5000 in dev
 });
 
-// Always attach latest token before each request
+// --- Request interceptor: attach token only where needed ---
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
+
+  // Resolve a clean pathname regardless of relative/absolute URL
+  // (works even if config.url is '/api/...' or 'http...').
+  const base = api.defaults.baseURL || window.location.origin;
+  const full = new URL(config.url, base);
+  const path = full.pathname;
+
+  // Public paths that do NOT need auth:
+  const isPublic =
+    path.startsWith('/api/tarot') || // public tarot proxy
+    path === '/health';              // health check
+
+  if (token && !isPublic) {
+    config.headers.Authorization = `Bearer ${token}`;
+  } else {
+    // Be explicit: ensure it's not sent to public endpoints
+    delete config.headers.Authorization;
+  }
+
   return config;
 });
 
@@ -23,15 +41,9 @@ api.interceptors.response.use(
     // 401 (unauthenticated) or 403 (forbidden) → log out + send to /login
     if ((status === 401 || status === 403) && !redirecting) {
       redirecting = true;
-      // Clear any stale credentials
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-
-      // Optional: be nice to the user
-      // You can replace this with your toast/snackbar
       alert('Your session expired. Please log in again.');
-
-      // Hard redirect so all state resets
       window.location.assign('/login');
     }
 
@@ -40,3 +52,4 @@ api.interceptors.response.use(
 );
 
 export default api;
+
