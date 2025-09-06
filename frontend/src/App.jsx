@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -20,6 +21,15 @@ export default function App() {
   const [mode, setMode] = useLocalStorage('mode', 'light');
   const theme = getTheme(mode);
   const toggleMode = () => setMode(mode === 'light' ? 'dark' : 'light');
+
+  // --- Warm the API (Render cold start) ---
+  useEffect(() => {
+    const url = `${import.meta.env.VITE_API_URL}/health`;
+    fetch(url, { cache: 'no-store' }).catch(() => {
+      // ignore errors; this is just a warm-up ping
+    });
+  }, []);
+  // ----------------------------------------
 
   return (
     <ThemeProvider theme={theme}>
@@ -49,3 +59,4 @@ export default function App() {
     </ThemeProvider>
   );
 }
+
