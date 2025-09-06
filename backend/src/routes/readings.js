@@ -1,14 +1,18 @@
 // backend/src/routes/readings.js
 import { Router } from 'express';
+import mongoose from 'mongoose';
 import auth from '../middleware/auth.js';
 import Reading from '../models/Reading.js';
 
 const router = Router();
+const { isValidObjectId } = mongoose;
 
 // All routes below require JWT
 router.use(auth);
 
-// CREATE
+/**
+ * CREATE a reading
+ */
 router.post('/', async (req, res) => {
   try {
     const { spread, title, notes, tags = [], cards = [] } = req.body;
@@ -22,68 +26,106 @@ router.post('/', async (req, res) => {
       tags,
       cards,
     });
+
     res.status(201).json(reading);
   } catch (e) {
-    res.status(400).json({ error: e.message });
+    res.status(400).json({ error: e.message || 'Invalid payload' });
   }
 });
 
-// LIST (own), with simple pagination
+/**
+ * LIST your readings (paginated)
+ * GET /api/readings?page=1&limit=10
+ */
 router.get('/', async (req, res) => {
-  const page = Math.max(parseInt(req.query.page || '1', 10), 1);
-  const limit = Math.min(Math.max(parseInt(req.query.limit || '10', 10), 1), 50);
-  const skip = (page - 1) * limit;
+  try {
+    const page = Math.max(parseInt(req.query.page || '1', 10), 1);
+    const limit = Math.min(Math.max(parseInt(req.query.limit || '10', 10), 1), 50);
+    const skip = (page - 1) * limit;
 
-  const [items, total] = await Promise.all([
-    Reading.find({ userId: req.user.id })
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit),
-    Reading.countDocuments({ userId: req.user.id }),
-  ]);
+    const [items, total] = await Promise.all([
+      Reading.find({ userId: req.user.id })
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      Reading.countDocuments({ userId: req.user.id }),
+    ]);
 
-  res.json({
-    page,
-    limit,
-    total,
-    pages: Math.ceil(total / limit),
-    items,
-  });
+    res.json({
+      page,
+      limit,
+      total,
+      pages: Math.max(1, Math.ceil(total / limit)),
+      items,
+    });
+  } catch (e) {
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
-// READ ONE (owner check)
+/**
+ * READ ONE (owner check)
+ */
 router.get('/:id', async (req, res) => {
-  const reading = await Reading.findById(req.params.id);
-  if (!reading || String(reading.userId) !== req.user.id) {
-    return res.status(404).json({ error: 'Not found' });
+  try {
+    const { id } = req.params;
+    if (!isValidObjectId(id)) return res.status(400).json({ error: 'Bad id' });
+
+    const reading = await Reading.findById(id);
+    if (!reading || String(reading.userId) !== req.user.id) {
+      return res.status(404).json({ error: 'Not found' });
+    }
+
+    res.json(reading);
+  } catch (e) {
+    res.status(500).json({ error: 'Server error' });
   }
-  res.json(reading);
 });
 
-// UPDATE (owner check) — partial
+/**
+ * UPDATE (partial, owner check)
+ */
 router.patch('/:id', async (req, res) => {
-  const allowed = ['spread', 'title', 'notes', 'tags', 'cards'];
-  const updates = {};
-  for (const k of allowed) if (k in req.body) updates[k] = req.body[k];
+  try {
+    const { id } = req.params;
+    if (!isValidObjectId(id)) return res.status(400).json({ error: 'Bad id' });
 
-  const reading = await Reading.findById(req.params.id);
-  if (!reading || String(reading.userId) !== req.user.id) {
-    return res.status(404).json({ error: 'Not found' });
+    const allowed = ['spread', 'title', 'notes', 'tags', 'cards'];
+    const updates = {};
+    for (const k of allowed) if (k in req.body) updates[k] = req.body[k];
+
+    const reading = await Reading.findById(id);
+    if (!reading || String(reading.userId) !== req.user.id) {
+      return res.status(404).json({ error: 'Not found' });
+    }
+
+    Object.assign(reading, updates);
+    await reading.save();
+    res.json(reading);
+  } catch (e) {
+    res.status(500).json({ error: 'Server error' });
   }
-
-  Object.assign(reading, updates);
-  await reading.save();
-  res.json(reading);
 });
 
-// DELETE (owner check)
+/**
+ * DELETE (owner check)
+ */
 router.delete('/:id', async (req, res) => {
-  const reading = await Reading.findById(req.params.id);
-  if (!reading || String(reading.userId) !== req.user.id) {
-    return res.status(404).json({ error: 'Not found' });
+  try {
+    const { id } = req.params;
+    if (!isValidObjectId(id)) return res.status(400).json({ error: 'Bad id' });
+
+    const reading = await Reading.findById(id);
+    if (!reading || String(reading.userId) !== req.user.id) {
+      return res.status(404).json({ error: 'Not found' });
+    }
+
+    await reading.deleteOne();
+    res.json({ message: 'Deleted' });
+  } catch (e) {
+    res.status(500).json({ error: 'Server error' });
   }
-  await reading.deleteOne();
-  res.json({ message: 'Deleted' });
 });
 
 export default router;
+
